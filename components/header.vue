@@ -1,7 +1,7 @@
 <template>
   <div class="header">
       <el-row type='flex' class="main" justify='space-between'>
- 
+     
       <div class="logo">
           <nuxt-link to='/'>
              <img src="http://157.122.54.189:9093/images/logo.jpg" alt="">
@@ -13,24 +13,31 @@
       <nuxt-link to='/post'>旅游攻略</nuxt-link>
       <nuxt-link to='/hotel'>酒店</nuxt-link>
       <nuxt-link to='/air'>机票</nuxt-link>
+       
 </el-row>
 
 <el-row type='flex'  align=middle>
 
-   <nuxt-link to='/user/login'  class="account-link"  v-if="false">登录/注册</nuxt-link>
-
+   <nuxt-link to='/user/login'  class="account-link"  v-if="!$store.state.user.userInfo.token">登录/注册</nuxt-link>
+   
     <el-dropdown   v-else >
   <span type='flex'  align='middle' class="el-dropdown-link">
-    用户名<i class="el-icon-arrow-down el-icon--right"></i>
-  </span>
+      <img :src="$axios.defaults.baseURL+$store.state.user.userInfo.user.defaultAvatar" alt="">
+    {{$store.state.user.userInfo.user.nickname}}  
+  </span> <i class="el-icon-arrow-down el-icon--right"></i>
   <el-dropdown-menu slot="dropdown">
+      
     <el-dropdown-item>
         <nuxt-link to='#'>个人中心</nuxt-link>
     </el-dropdown-item>
     <el-dropdown-item>
-        <nuxt-link to='#'>退出</nuxt-link>
-        </el-dropdown-item>   
+        <!-- <nuxt-link to='#' ></nuxt-link> -->
+        <div @click="exit">退出</div>
+        </el-dropdown-item>  
+
+               
   </el-dropdown-menu>
+             
 </el-dropdown>
 
 </el-row>
@@ -43,6 +50,22 @@
 
 <script>
 export default {
+     mounted () {
+        // console.log(this.$store.state.user.name);
+        
+     },
+
+     methods: {
+         exit(){
+            
+             
+         this.$store.commit('user/setuserinfo',{
+             token:'',
+             user:{}
+         })
+         
+     }
+     }
 
 }
 </script>

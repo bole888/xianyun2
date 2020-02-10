@@ -12,22 +12,19 @@
 
 
   <!-- 搜索框 -->
-          <div class="banner-content">
-              <div class="search-bar">
-                  <el-row type='flex' class="search-tab">
-                      <span @click="handleclick(index)"
-                      :class="{active:current===index}"
-                      v-for="(item,index) in options"
-                      :key="index"> <i>{{item.name}}</i></span>
-                  </el-row>
-
-                  <el-row type='flex' class="search-input">
-                  <input type="text" 
-                  :placeholder="options[current].placeholder"> 
-                   <i class="el-icon-search" ></i>
+         <div class="banner-content">
+               <div class="search-bar">
+                   <el-row type='flex' class="search-tab">
+                       <span v-for="(item,index) in options" 
+                       :key="index" @click="handleclick(index)"
+                       :class="{active:current===index}"><i>{{item.name}}</i></span>
                    </el-row>
-              </div>
-          </div>
+                   <el-row type='flex' class="search-input" align='middle'>
+                       <input type="text" :placeholder='options[current].placeholder'>
+                       <i class="el-icon-search"></i>
+                   </el-row>
+               </div>
+         </div>
         
          
   </div>
@@ -48,10 +45,12 @@ export default {
 
             options:[
                 {name:'攻略',placeholder:'搜索城市'},
-                {name:'酒店',placeholder:'输入搜索城市查询酒店'},
-                {name:'机票',placeholder:'搜索城市查找飞行时段'}
+                {name:'酒店',placeholder:'输入城市查找酒店'},
+                {name:'机票',placeholder:'搜索城市查询飞行时段'}
             ],
+
             current:0
+
         }
     },
 
@@ -69,14 +68,13 @@ export default {
     methods: {
         handleclick(index){
             if(index===2){
-               this.$router.push({path:'/air'})
+                this.$router.push({path:'/air'})
             }
             this.current=index
-        },
-        // handleSearch(){
-        //     this.$router.push({path:'/post'})
-        // }
+        }
     }
+
+   
 
 }
 </script>
