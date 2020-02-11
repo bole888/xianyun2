@@ -1,72 +1,64 @@
 <template>
-  <el-form :model="registerdata" ref="registerform" :rules="rules" class="form">
-    <el-form-item class="form-item" prop="username">
-      <el-input v-model="registerdata.username" placeholder="用户名手机"></el-input>
+  <el-form :model="registerInfo" :rules="rules" ref="registerForm" label-width="100px" class="form">
+    <el-form-item label="账号" prop="username" class="form-item">
+      <el-input v-model="registerInfo.username" placeholder="请输入用户名/手机号码"></el-input>
     </el-form-item>
-
-    <el-form-item class="form-item" prop="captcha">
-      <el-input v-model="registerdata.captcha" placeholder="验证码">
+    <el-form-item label="验证码" prop="captcha" class="form-item">
+      <el-input v-model="registerInfo.captcha" placeholder="请输入验证码">
         <template slot="append">
-          <el-button @click="handleSendCaptcha">发送验证码</el-button>
+          <el-button @click="sendcaptchas">获取验证码</el-button>
         </template>
       </el-input>
     </el-form-item>
-
-    <el-form-item class="form-item" prop="nickname">
-      <el-input v-model="registerdata.nickname" placeholder="你的名字"></el-input>
+    <el-form-item label="昵称" prop="nickname" class="form-item">
+      <el-input v-model="registerInfo.nickname" placeholder="请输入昵称"></el-input>
+    </el-form-item>
+    <el-form-item label="密码" prop="password" class="form-item">
+      <el-input v-model="registerInfo.password" placeholder="请输入密码"></el-input>
+    </el-form-item>
+    <el-form-item label="确认密码" prop="checkpassword" class="form-item">
+      <el-input v-model="registerInfo.checkpassword" placeholder="请输入确认密码"></el-input>
     </el-form-item>
 
-    <el-form-item class="form-item" prop="password">
-      <el-input v-model="registerdata.password" placeholder="密码" type="password"></el-input>
-    </el-form-item>
-
-    <el-form-item class="form-item" prop="checkpassword">
-      <el-input v-model="registerdata.checkpassword" placeholder="确认密码" type="password"></el-input>
-    </el-form-item>
-
-    <el-button class="submit" type="primary" @click="handleRegSubmit">注册</el-button>
+    <el-button type="primary" class="submit" @click="onRegister">注册</el-button>
   </el-form>
 </template>
 
 <script>
 export default {
   data() {
-      const validateusername = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请输入用户名手机"));
-      } else {
-        if (!/^[1]([3-9])[0-9]{9}$/.test(value)) {
-          callback(new Error("手机号码格式有误，请重填"));
+        var validatepassword = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        } else {
+          if (this.registerInfo.checkpassword !== '') {
+            this.$refs.registerForm.validateField('checkpassword');
+          }
+          callback();
+        }
+      };
+      var validatecheckpassword = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入确认密码'));
+        } else if (value !== this.registerInfo.password) {
+          callback(new Error('两次输入密码不一致!'));
         } else {
           callback();
         }
-      }
-    };
-    const validatepassword = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请输入密码"));
-      } else {
-        if (this.registerdata.checkpassword !== "") {
-          this.$refs.registerform.validateField("checkpassword");
+      };
+       var validateusername = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入用户名/手机号码'));
+        } else if(!(/^1[3456789]\d{9}$/.test(value)))  {
+          callback(new Error('手机格式有误!请重新填写'));
+        } else {
+          callback();
         }
-        callback();
-      }
-    };
-
-    const validatecheckpassword = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请再次输入确认密码"));
-      } else if (value !== this.registerdata.password) {
-        callback(new Error("两次输入密码不一致!"));
-      } else {
-        callback();
-      }
-    };
-
+      };
 
     return {
-      registerdata: {
-        username:"",
+      registerInfo: {
+        username: "",
         captcha: "",
         nickname: "",
         password: "",
@@ -74,39 +66,38 @@ export default {
       },
       rules: {
         username: [{ validator: validateusername, trigger: "blur" }],
-        captcha: { required: true, message: "请输入验证码", trigger: "blur" },
-        nickname: { required: true, message: "请输入昵称", trigger: "blur" },
+        captcha:{ required: true, message: '请输入验证码', trigger: 'blur' },
+        nickname:{ required: true, message: '请输入昵称', trigger: 'blur' },
         password: [{ validator: validatepassword, trigger: "blur" }],
         checkpassword: [{ validator: validatecheckpassword, trigger: "blur" }]
       }
     };
-
-  
   },
 
   methods: {
-    handleSendCaptcha() {
-      if(this.registerdata.username===''){
-          return 
-      }
-       this.$store.dispatch('user/getCaptcha',{tel:this.registerdata.username})
-       .then(res=>{
-             this.$message.success('验证码是:000000')
-          })
+      sendcaptchas(){
+         
+      this.$store.dispatch('user/getcaptchas',{tel:this.registerInfo.username})
+      .then(res=>{
+          this.$message.success('验证码是:'+res.data.code)
+      })
     },
-    handleRegSubmit() {
-      
-       this.$refs['registerform'].validate((valid) => {
+
+      onRegister() {
+           this.$refs['registerForm'].validate((valid) => {
           if (valid) {
-             const {checkpassword,...props} = this.registerdata
-      this.$store.dispatch('user/RegSubmit',props)
-      this.$message.success('注册成功')
-      this.$router.push({path:'/'})
-          }
+               const  {checkpassword, ...props} = this.registerInfo
+             this.$store.dispatch('user/getregisterdata',props)
+             .then(res=>{
+                 this.$message.success('注册成功')
+                 this.$router.push('/')
+             })
+          } 
           })
-    }
+       
+      }
   }
-};
+}
 </script>
 
 <style scoped lang="less">

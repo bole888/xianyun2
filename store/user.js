@@ -1,60 +1,58 @@
 export const state=()=>({
-  
-      userInfo:{
+     userInfo:{
          token:'',
          user:{}
-    }
-    
+     }
 })
 
-
-export const mutations ={
-     setuserinfo(state,data){
-        //  console.log(state);        
+export const mutations={
+      setuserinfo(state,data){
+        console.log(state);
+        console.log(data);
+        
         state.userInfo=data
-       
-     }
+      }
 }
 
 export const actions= {
-    onSubmit(store,data){
-        // console.log(store);
-        
-            return  this.$axios({
-                  url:'/accounts/login',
-                  method:'POST',
-                  data:data
-              }).then(res=>{
-                // console.log(res);
-                const {data} =res 
+    login(store,data){
+      return  this.$axios({
+            url:"/accounts/login",
+            method:'POST',
+            data:data
+        }).then(res=>{
+            console.log(res);
+            const {data}= res
+            store.commit('setuserinfo',data)
+        })
+    },
+    
+
+    getcaptchas(store,data){
+      console.log(store);
+     return  this.$axios({
+        url:'/captchas',
+        method:'POST',
+        data:data
+    }).then(res=>{
+        console.log(res);
+        return res
+    })    
+    },
+
+
+    getregisterdata(store,data){
+        return this.$axios({
                 
-                store.commit('setuserinfo',data)                
-              })  
-  },
-
-    getCaptcha(store,data){
-      return  this.$axios({
-          url:'/captchas',
-          method:'POST',
-          data:data
+            url:'/accounts/register',
+            method:'POST',
+            data:data
         }).then(res=>{
-          // console.log(res);
-            return res
+            console.log(res);    
+            // return  res  
+            const {data} = res
+            store.commit('setuserinfo',data)
         })
-
-      },
-
-      RegSubmit(store,data){
-      return  this.$axios({
-          url:'/accounts/register',
-          method:'POST',      
-          data:data
-        }).then(res=>{
-          console.log(res);
-          const {data} =res
-          $store.commit('setuserinfo',data)
-          
-        })
-
-      }
+    }
 }
+
