@@ -40,6 +40,7 @@
                 <el-date-picker type="date" 
                  v-model="airdata.departDate"
                 placeholder="请选择日期" 
+                :picker-options="pickerOptions1"
                 style="width: 100%;"
                 @change="handleDate">
                 </el-date-picker>
@@ -71,6 +72,12 @@ export default {
             currentTab:0,
             departdata:[],
             destdata:[],
+             pickerOptions1: {
+          disabledDate(time) {
+            return time.getTime() +3600 * 1000 * 24 <= Date.now();
+          }
+          },
+            
 
             airdata:{
                 departCity:'',
@@ -95,7 +102,12 @@ export default {
             }
         },
 
-        queryDepartSearch(value,cb){          
+        queryDepartSearch(value,cb){   
+            if(!value){
+                this.departdata=[];
+                cb([]);
+                return;
+            }       
               this.$axios({
                   url:'/airs/city',
                   params:{name:value}
@@ -111,7 +123,12 @@ export default {
                   cb(newdata)              
               })
         },
-        queryDestSearch(value,cb){          
+        queryDestSearch(value,cb){  
+            if(!value){
+                 this.destdata=[];
+                 cb([]);
+                 return;
+            }        
               this.$axios({
                   url:'/airs/city',
                   params:{name:value}
@@ -143,14 +160,14 @@ export default {
             console.log(this.airdata.destCode);     
         },
 
-        handleDepartblur(data){
+        handleDepartblur(){
             if(this.departdata.length===0){
                 return
             }
            this.airdata.departCity= this.departdata[0].value
            this.airdata.departCode= this.departdata[0].sort
         },
-        handleDestblur(data){
+        handleDestblur(){
             if(this.destdata.length===0){
                 return
             }
