@@ -1,215 +1,203 @@
 <template>
-    <div class="search-form">
+  <div class="search-form">
+    <el-row class="search-tab" type="flex" justify="center" align="middle">
+      <span
+        v-for="(item,index) in ['单程','往返']"
+        :key="index"
+        :class="{active:current===index}"
+        @click="handleclick(index)"
+      >{{item}}</span>
+    </el-row>
 
-        <!-- 头部tab切换 -->
-        <el-row type="flex" class="search-tab">
-            <span v-for="(item, index) in tabs" :key="index"
-            @click="handleSearchTab(item, index)"
-            :class="{active: index === currentTab}">
-                <i :class="item.icon"></i>{{item.name}}
-            </span>
-        </el-row>
-
-        <el-form class="search-form-content" ref="form" :model='airdata' label-width="80px">
-            <el-form-item label="出发城市">
-                <!-- fetch-suggestions 返回输入建议的方法 -->
-                <!-- select 点击选中建议项时触发 -->
-                <el-autocomplete
-                :trigger-on-focus="false"
-                v-model="airdata.departCity"
-                :fetch-suggestions="queryDepartSearch"
-                placeholder="请搜索出发城市"
-                @select="handleDepartSelect"
-                @blur="handleDepartblur"
-                class="el-autocomplete"
-                ></el-autocomplete>
-            </el-form-item>
-             <el-form-item label="到达城市">
-                <el-autocomplete
-                :trigger-on-focus="false"
-                 v-model="airdata.destCity"
-                :fetch-suggestions="queryDestSearch"
-                placeholder="请搜索到达城市"
-                @select="handleDestSelect"
-                @blur="handleDestblur"
-                class="el-autocomplete"
-                ></el-autocomplete>
-            </el-form-item>
-            <el-form-item label="出发时间"> 
-                <!-- change 用户确认选择日期时触发 -->
-                <el-date-picker type="date" 
-                 v-model="airdata.departDate"
-                placeholder="请选择日期" 
-                :picker-options="pickerOptions1"
-                style="width: 100%;"
-                @change="handleDate">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="">
-                <el-button style="width:100%;" 
-                type="primary" 
-                icon="el-icon-search"
-                @click="handleSubmit">
-                    搜索
-                </el-button>
-            </el-form-item>
-            <div class="reverse">
-                <span @click="handleReverse">换</span>
-            </div>
-        </el-form>  
+    <el-form class="search-form-content" label-width="80px">
+      <el-form-item label="出发城市">
+        <el-autocomplete
+          class="el-autocomplete"
+          v-model="searchInfo.departCity"
+          :fetch-suggestions="querydepSearch"
+          placeholder="请搜索出发城市"
+          
+          @select="handledepSelect"
+          @blur="handledepBlur"
+        ></el-autocomplete>
+      </el-form-item>
+      <el-form-item label="到达城市">
+        <el-autocomplete
+          class="el-autocomplete"
+          v-model="searchInfo.destCity"
+          :fetch-suggestions="querydestSearch"
+          placeholder="请搜索到达城市"
+          
+          @select="handledestSelect"
+           @blur="handledestBlur"
+        ></el-autocomplete>
+      </el-form-item>
+      <el-form-item label="出发时间">
+        <!-- <el-col :span="6">
+        <el-form-item prop="date1">-->
+        <el-date-picker
+         @change="handleDate"
+          type="date"
+          placeholder="选择日期"
+          :picker-options="pickerOptions1"
+          v-model="searchInfo.departDate" 
+          style="width: 100%;"
+        ></el-date-picker>
+        <!-- </el-form-item>
+        </el-col>-->
+      </el-form-item>
+      <el-button type="primary" style="width:100%;" @click="onsearch">
+        <i class="el-icon-search"></i>搜索
+      </el-button>
+      <div class="reverse">
+        <span @click="handleReverse">换</span>
       </div>
+    </el-form>
+  </div>
 </template>
 
 <script>
 import moment from "moment";
 export default {
-    data () {
+    data () {     
         return {
-            tabs:[
-                {icon: "iconfont icondancheng", name: "单程"},
-                 {icon: "iconfont iconshuangxiang", name: "往返"}
-            ],
-            currentTab:0,
-            departdata:[],
-            destdata:[],
-             pickerOptions1: {
-          disabledDate(time) {
-            return time.getTime() +3600 * 1000 * 24 <= Date.now();
-          }
-          },
-            
+             current:0,
+             deparr:[],
+             destarr:[],
 
-            airdata:{
+            searchInfo:{
                 departCity:'',
                 departCode:'',
                 destCity:'',
                 destCode:'',
                 departDate:''
+            },
+
+         pickerOptions1: {
+            disabledDate(time) {
+            return time.getTime()+3600 * 1000 * 24 < Date.now();
+          }
         }
-    }
-},
+        }     
+    },
 
-       methods: {
-        handleSearchTab(item, index){
-            this.currentTab===index
 
+    methods: {
+        handleclick(index){
+            // this.current=index;
             if(index===1){
-               this.$alert('目前暂不支持往返，请使用单程选票！', '提示', {
-          confirmButtonText: '确定',
-            type: 'warning'
-        
-        });
+             this.$alert('目前暂不支持往返，请使用单程选票！', '提示', {
+               confirmButtonText: '确定',
+                type: 'warning'
+              });
             }
         },
-
-        queryDepartSearch(value,cb){   
-            if(!value){
-                this.departdata=[];
-                cb([]);
-                return;
-            }       
-              this.$axios({
-                  url:'/airs/city',
-                  params:{name:value}
-              }).then(res=>{
-                  console.log(res);
-
-                  const {data}= res.data
-                  const newdata=data.map(v=>{
-                      v.value=v.name.replace('市','')
-                      return v
-                  })
-                  this.departdata = newdata
-                  cb(newdata)              
-              })
-        },
-        queryDestSearch(value,cb){  
-            if(!value){
-                 this.destdata=[];
-                 cb([]);
-                 return;
-            }        
-              this.$axios({
-                  url:'/airs/city',
-                  params:{name:value}
-              }).then(res=>{
-                  console.log(res);
-
-                  const {data}= res.data
-                  const newdata=data.map(v=>{
-                      v.value=v.name.replace('市','')
-                      return v
-                  })
-                  this.destdata = newdata
-                  cb(newdata)              
-              })
-        },
-
-        handleDepartSelect(item){
-            console.log(item);
-            this.airdata.departCity=item.value
-            this.airdata.departCode=item.sort
-            console.log(this.airdata.departCity);
-            console.log(this.airdata.departCode);     
-        },
-        handleDestSelect(each){
-            console.log(each);
-            this.airdata.destCity=each.value
-            this.airdata.destCode=each.sort
-            console.log(this.airdata.destCity);
-            console.log(this.airdata.destCode);     
-        },
-
-        handleDepartblur(){
-            if(this.departdata.length===0){
-                return
-            }
-           this.airdata.departCity= this.departdata[0].value
-           this.airdata.departCode= this.departdata[0].sort
-        },
-        handleDestblur(){
-            if(this.destdata.length===0){
-                return
-            }
-           this.airdata.destCity= this.destdata[0].value
-           this.airdata.destCode= this.destdata[0].sort
-        },
-
         handleDate(value){
-              this.airdata.departDate=moment(value).format("YYYY-MM-DD")
-              console.log(this.airdata.departDate);      
+            // console.log(value);
+           this.searchInfo.departDate=moment(value).format('YYYY-MM-DD');
+            console.log(this.searchInfo.departDate);    
         },
-
+          
         handleReverse(){
-            const {departCity,departCode,destCity,destCode} =this.airdata
-             this.airdata.departCity=destCity
-             this.airdata.departCode=destCode
+            const {destCode,destCity,departCode,departCity}=this.searchInfo;
+            this.searchInfo.departCity=destCity;
+            this.searchInfo.departCode=destCode;
 
-             this.airdata.destCity=departCity
-             this.airdata.destCode=departCode        
+            this.searchInfo.destCity=departCity;
+           this.searchInfo.destCode=departCode;
         },
 
-        handleSubmit(){
-             if(!this.airdata.departCity){
-                 this.$message.error('请输入出发城市');
+         handledepSelect(item) {
+        console.log(item);
+        this.searchInfo.departCity=item.value;
+        this.searchInfo.departCode=item.sort
+        // console.log(this.searchInfo.departCode);
+        
+      },
+         handledestSelect(item) {
+        console.log(item);
+        this.searchInfo.destCity=item.value;
+        this.searchInfo.destCode=item.sort;
+      },
+         
+         handledepBlur(){
+            if(this.deparr.length===0){
+                return;
+            }          
+            this.searchInfo.departCity=this.deparr[0].value;
+            this.searchInfo.departCode=this.deparr[0].sort;
+         },
+         handledestBlur(){
+             if(this.destarr.length===0){
                  return;
              }
-             if(!this.airdata.destCity){
-                this.$message.error('请输入到达城市');
-                 return;
-             }
-             if(!this.airdata.departDate){
-                 this.$message.error('请选择日期');
-                 return;
-             }
+             this.searchInfo.destCity=this.destarr[0].value;
+             this.searchInfo.destCode=this.destarr[0].sort;
+         },
+
+         querySearch(value){
+      return this.$axios({
+              url:"/airs/city",
+              params:{name:value}
+          }).then(res=>{
+              console.log(res);
+               let arr= res.data.data.map(v=>{
+                   v.value=v.name.replace('市','')
+                   return v;
+              })     
+              return arr;             
+            })
+         },
+
+      querydepSearch(value,cb){
+        console.log(value);
+        
+          if(!value){
+              this.deparr=[];
+              cb([]);
+              return;
+          }
+          this.querySearch(value).then(arr=>{
+              this.deparr=arr;
+               cb(arr);  
+          })        
+      },
+      querydestSearch(value,cb){
+          if(!value){
+              this.destarr=[];
+              cb([]);
+              return;
+          }
+          this.querySearch(value).then(arr=>{
+              this.destarr=arr;
+                 cb(arr);
+          })       
+      },
+
+      onsearch(){
+          if(!this.searchInfo.departCity){
+              this.$message.error('请输入出发城市');
+              return;
+          }
+          if(!this.searchInfo.destCity){
+              this.$message.error('请输入到达城市');
+              return;
+          }
+          if(!this.searchInfo.departDate){
+              this.$message.error('请选择日期');
+              return;
+          }
+
+          this.$store.commit('air/sethistory',this.searchInfo)
+            console.log(this.searchInfo);
             
-             this.$router.push({
-                 path:'/air/flights',
-                 query:this.airdata
-             })
-        }
+          this.$router.push({
+              path:'air/flights',
+              query:this.searchInfo
+          })
+      }
     }
-}               
+}
 </script>
 
 <style scoped lang="less">

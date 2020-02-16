@@ -30,9 +30,9 @@ export default {
              this.$refs['loginform'].validate((valid) => {
           if (valid) {
               this.$store.dispatch('user/login', this.logindata)
-              .then(res=>{
-                  this.$message.success('登陆成功')
-                  this.$router.push('/')
+              .then(()=>{
+                  this.$message.success('登陆成功');
+                  this.$router.replace(this.$route.query.returnUrl || '/' )
               })
               
           } 
