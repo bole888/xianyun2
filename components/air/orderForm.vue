@@ -183,44 +183,46 @@ export default {
                  }).then(res=>{
                      console.log(res);
                      this.$message.success('订单提交成功');
+                     this.$router.push({
+                         path:'/air/pay',
+                         query:{id:res.data.data.id}
+                     })
                  })
           }       
         },
 
-    mounted () {
-        const {id,seat_xid} = this.$route.query
-        this.$axios({
-            url:`/airs/`+id,
-            params:{
-            seat_xid: seat_xid}
-        }).then(res=>{
-            console.log(res);
-            this.infodata=res.data;
-            this.insurance_info=res.data.insurances;
+     mounted () {
+         this.$axios({
+             url:`/airs/${this.$route.query.id}`,
+             params:{seat_xid:this.$route.query.seat_xid}
+         }).then(res=>{
+             console.log(res);
+             this.infodata=res.data;
+             this.insurance_info=res.data.insurances;
+             this.$store.commit('air/setorderdetail',this.infodata)
+         })
+     },
 
-            this.$store.commit('air/setorderDetail',this.infodata)
-        })
-    },
-
-    computed: {
-        allprice(){
-             let price=0;
-             
+     computed: {
+         allprice(){
              if(!this.infodata.seat_infos){
-                 return;
+                 return '';
              }
-             price+=this.infodata.seat_infos.org_settle_price;
-             price+=this.infodata.airport_tax_audlet;
-             this.infodata.insurances.forEach(v=>{
-                 if(this.userinfo.insurances.indexOf(v.id)>-1){
-                     price+=v.price
-                 }
-             })
-             price*=this.userinfo.users.length;
-             this.$store.commit('air/setallPrice',price);
-             return '';
-        }
-    }
+           let price=0;
+           
+           price+=this.infodata.airport_tax_audlet;
+           price+=this.infodata.seat_infos.org_settle_price;
+           this.infodata.insurances.forEach(v=>{
+               if(this.userinfo.insurances.indexOf(v.id)>-1){
+                   price+=v.price;
+               }
+           })
+           price*=this.userinfo.users.length;
+             this.$store.commit('air/setallprice',price)
+             return ''
+         }
+     }
+   
 
 }
 </script>

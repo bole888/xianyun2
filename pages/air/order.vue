@@ -6,11 +6,11 @@
 
             <!-- 侧边栏 -->
             <div class="aside">
-                 <OrderAside :data='$store.state.air.orderDetail'></OrderAside>
+                 <OrderAside :data='$store.state.air.orderdetail'></OrderAside>
             </div>
         </el-row>
-    </div>
-</template>
+    </div></template>
+
 
 <script>
 import OrderForm from '@/components/air/orderForm'

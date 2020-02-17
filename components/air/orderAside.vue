@@ -41,42 +41,39 @@
         </el-row>
         <el-row type="flex" justify="space-between" align="middle" class="info-bar">
             <span>应付总额：</span>
-            <span class="price">￥{{Number($store.state.air.allPrice).toFixed(2)}}</span>
+            <span class="price">￥{{Number($store.state.air.allprice).toFixed(2)}} </span>
         </el-row>           
     </div>
 </template>
-
 
 <script>
 export default {
     props: {
         data:{
-                type:Object,
-                default:{
+            type:Object,
+            default:{
                     seat_infos:{}
-                }
             }
+        }
     },
 
     computed: {
         rankTime(){
-            if(!this.data.dep_time) return '';
+            if(!this.data.dep_time){
+                return ''
+            }
 
-
-            let endarr=this.data.arr_time.split(':');
-            let end=endarr[0]*60+Number(endarr[1])
-
-            let deparr=this.data.dep_time.split(':');
-            let dep=deparr[0]*60+Number(deparr[1]);
-
-                 if(end<dep){
-                     end+=24*60
-                 }
-               let dis=  end-dep;
-               let hour=Math.floor(dis/60);
-               let min= dis%60;
-
-               return hour+'小时'+min+'分钟'
+            const end= this.data.arr_time.split(':')[0]*60+
+            Number(this.data.arr_time.split(':')[1])
+            const dep= this.data.dep_time.split(':')[0]*60+
+            Number(this.data.dep_time.split(':')[1])
+            if(end<dep){
+                end+=24*60
+            }
+            const dis=end-dep
+            const hour =Math.floor(dis/60);
+            const min =dis%60;
+            return hour+'小时'+min+'分钟'
         }
     }
 

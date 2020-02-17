@@ -32,7 +32,7 @@ export default {
               this.$store.dispatch('user/login', this.logindata)
               .then(()=>{
                   this.$message.success('登陆成功');
-                  this.$router.replace(this.$route.query.returnUrl || '/' )
+                 this.$router.replace(this.$route.query.returnUrl||'/')
               })
               
           } 

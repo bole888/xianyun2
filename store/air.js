@@ -1,10 +1,10 @@
  export const state=()=>{
     return  {
         historydata:[],
-        orderDetail:{
+        orderdetail:{
           seat_infos:{}
         },
-        allPrice:0
+        allprice:0
     }       
 }
 
@@ -17,11 +17,13 @@ export const mutations= {
         }
       },
 
-      setorderDetail(state,data){
-        state.orderDetail=data;
+      setorderdetail(state,data){
+        state.orderdetail=data;
       },
 
-      setallPrice(state,data){
-        state.allPrice=data;
+      setallprice(state,data){
+          state.allprice=data
       }
+
+    
 }
